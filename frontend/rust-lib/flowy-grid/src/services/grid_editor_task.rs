@@ -7,17 +7,17 @@ use lib_infra::future::BoxResultFuture;
 
 pub(crate) trait GridServiceTaskScheduler: Send + Sync + 'static {
     fn gen_task_id(&self) -> BoxFuture<TaskId>;
-    fn register_task(&self, task: Task) -> BoxFuture<()>;
+    fn add_task(&self, task: Task) -> BoxFuture<()>;
 }
 
 impl GridTaskHandler for GridRevisionEditor {
-    fn handler_id(&self) -> &TaskHandlerId {
+    fn handler_id(&self) -> &str {
         &self.grid_id
     }
 
-    fn process_task(&self, task: Task) -> BoxResultFuture<(), FlowyError> {
+    fn process_content(&self, content: TaskContent) -> BoxResultFuture<(), FlowyError> {
         Box::pin(async move {
-            match task.content {
+            match content {
                 TaskContent::Snapshot => {}
                 TaskContent::Filter(context) => self.filter_service.process(context).await?,
             }
@@ -32,10 +32,10 @@ impl GridServiceTaskScheduler for GridTaskSchedulerRwLock {
         Box::pin(async move { this.read().await.next_task_id() })
     }
 
-    fn register_task(&self, task: Task) -> BoxFuture<()> {
+    fn add_task(&self, task: Task) -> BoxFuture<()> {
         let this = self.clone();
         Box::pin(async move {
-            this.write().await.register_task(task);
+            this.write().await.add_task(task);
         })
     }
 }

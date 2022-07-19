@@ -1,4 +1,5 @@
 use crate::services::tasks::scheduler::GridTaskScheduler;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::{watch, RwLock};
@@ -34,12 +35,9 @@ impl GridTaskRunner {
                 // The runner will be stopped if the corresponding Sender drop.
                 break;
             }
-            let mut interval = interval(self.debounce_duration);
-            interval.tick().await;
-
-            if let Err(e) = self.scheduler.write().await.process_next_task().await {
-                tracing::error!("{:?}", e);
-            }
+            // let mut interval = interval(self.debounce_duration);
+            // interval.tick().await;
+            // let _ = self.scheduler.write().await.process_next_task().await;
         }
     }
 }
